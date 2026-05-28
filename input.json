@@ -45,6 +45,15 @@
         }
       ],
       "Name": "Vertical"
+    },
+    {
+      "Type": "Button",
+      "Buttons": [
+        {
+          "KeyCode": 2001
+        }
+      ],
+      "Name": "use_tool"
     }
   ]
 }
