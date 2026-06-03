@@ -16,6 +16,19 @@ local current_map: map?
 -- example: base_1
 local pattern_base_name = "base_(%d+)"
 
+local function table_unpack_full<T>(t: {n: number, [number]: T}): ...T
+	return table.unpack(t, 1, t.n)
+end
+
+local function delay<A...>(delay_time: number, fun: (A...) -> (), ...: A...): ()
+	local arguments: {n: number, [number]: any} = table.pack(...)
+	local function caller(): ()
+		wait(delay_time)
+		fun(table_unpack_full(arguments))
+	end
+	spawn(caller)
+end
+
 local function get_map_from_container(map_container_maybe: Instance): map?
 	local bases: {base} = {}
 
@@ -27,7 +40,7 @@ local function get_map_from_container(map_container_maybe: Instance): map?
 	local map_container: Model = map_container_maybe :: any
 
 	for _, child in map_container_maybe:GetChildren() do
-		if child:IsA("Model") == false then
+		if child:IsA("Folder") == false then
 			continue
 		end
 
@@ -104,6 +117,26 @@ local function pick_random_map(): map?
 	return map
 end
 
+local game_end
+local function process_score(map: map): ()
+	-- ~ Investigate: It seems that it is possible for the game to end before it quite begins, visually resulting in both the lobby and map being present simultaneously.
+	game_end()
+end
+
+local function setup_map(map: map): ()
+	for _, base in map.bases do
+		local function on_touched(toucher_maybe: Physical): ()
+			if not toucher_maybe:IsA("Player") then
+				return
+			end
+
+			process_score(map)
+		end
+		
+		base.goal.Touched:Connect(on_touched)
+	end
+end
+
 local function game_start(): ()
 	local random_map = pick_random_map()
 	if random_map == nil then
@@ -113,13 +146,14 @@ local function game_start(): ()
 	
 	local map = random_map
 	current_map = map
+	setup_map(map)
 
 	map.container.Parent = Environment
 	-- Must be Hidden and not ServerHidden for map to be hidden on client. I assume ServerHidden works on the server.
 	lobby.Parent = Hidden
 end
 
-local function game_end(): ()
+game_end = function(): ()
 	if current_map == nil then
 		print("Can not stop because `current_map` was not found.")
 		return
@@ -129,11 +163,8 @@ local function game_end(): ()
 
 	lobby.Parent = Environment
 	map.container:Destroy()
+
+	delay(5, game_start)
 end
 
-while true do
-	game_start()
-	wait(5)
-	game_end()
-	wait(5)
-end
+game_start()
