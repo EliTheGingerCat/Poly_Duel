@@ -1,14 +1,14 @@
+local entity_mod = require(script.Parent:FindChild("entity") :: ModuleScript) :: Poly_Duel_module_entity
 local lobby = Environment:FindChild("lobby")
 local maps_folder = ServerHidden:FindChild("maps")
+local team_mod = require(script.Parent:FindChild("team") :: ModuleScript) :: Poly_Duel_module_team
 
-type base = {
-	goal: Part,
-	spawn_part: Part,
-}
+type entity = Poly_Duel_entity
+type team = Poly_Duel_team
 
 type map = {
-	bases: {base},
 	container: Model,
+	teams: {team},
 }
 
 local current_map: map?
@@ -30,7 +30,7 @@ local function delay<A...>(delay_time: number, fun: (A...) -> (), ...: A...): ()
 end
 
 local function get_map_from_container(map_container_maybe: Instance): map?
-	local bases: {base} = {}
+	local teams: {team} = {}
 
 	if map_container_maybe:IsA("Model") == false then
 		print("Map container is not a model.")
@@ -83,17 +83,17 @@ local function get_map_from_container(map_container_maybe: Instance): map?
 
 		local spawn_part: Part = spawn_part_maybe :: any
 
-		local base: base = {
+		local team: team = team_mod.create({
 			goal = goal,
 			spawn_part = spawn_part,
-		}
+		})
 
-		table.insert(bases, base)
+		table.insert(teams, team)
 	end
 
 	local map: map = {
-		bases = bases,
 		container = map_container,
+		teams = teams,
 	}
 
 	return map
@@ -118,23 +118,85 @@ local function pick_random_map(): map?
 end
 
 local game_end
-local function process_score(map: map): ()
+local function process_score(map: map, entity: entity, team: team): ()
+	team.points += 1
+
 	-- ~ Investigate: It seems that it is possible for the game to end before it quite begins, visually resulting in both the lobby and map being present simultaneously.
-	game_end()
+
+	if team.points >= 5 then
+		print(`Team with id {team.id} wins!`)
+		game_end()
+	else
+		print(`Team with id {team.id} has {team.points} points.`)
+	end
 end
 
 local function setup_map(map: map): ()
-	for _, base in map.bases do
+	for _, team in map.teams do
 		local function on_touched(toucher_maybe: Physical): ()
 			if not toucher_maybe:IsA("Player") then
 				return
 			end
 
-			process_score(map)
+			local player: Player = toucher_maybe :: any
+
+			local entity = entity_mod.find_by_player(player)
+
+			if entity == nil then
+				print("Error: There is no entity with this player.")
+				return
+			end
+
+			if entity.team_id == nil then
+				return
+			end
+
+			if entity.team_id == team.id then
+				return
+			end
+
+			process_score(map, entity, team)
 		end
 		
-		base.goal.Touched:Connect(on_touched)
+		team.goal.Touched:Connect(on_touched)
 	end
+end
+
+local function add_entity_to_team(team: team, entity: entity): ()
+	table.insert(team.members, entity)
+	entity.team_id = team.id
+end
+
+local function setup_entities(map: map): ()
+	local teams_size = #map.teams
+
+	for entity_index, entity in entity_mod.all_entities do
+		local team_index = (entity_index - 1) % teams_size + 1
+		local team = map.teams[team_index]
+		add_entity_to_team(team, entity)
+	end
+end
+
+local function get_smallest_team(map: map): team
+	local smallest_size = math.huge
+	local smallest_teams = {}
+	for _, this_team in map.teams do
+		local this_size = #this_team.members
+		if this_size < smallest_size then
+			smallest_size = this_size
+			table.clear(smallest_teams)
+			table.insert(smallest_teams, this_team)
+		elseif this_size == smallest_size then
+			table.insert(smallest_teams, this_team)
+		end
+	end
+	local random_smallest = smallest_teams[math.random(1, #smallest_teams)]
+	return random_smallest
+end
+
+local function setup_new_entity(map: map, entity: entity): ()
+	local team = get_smallest_team(map)
+	add_entity_to_team(team, entity)
 end
 
 local function game_start(): ()
@@ -147,6 +209,7 @@ local function game_start(): ()
 	local map = random_map
 	current_map = map
 	setup_map(map)
+	setup_entities(map)
 
 	map.container.Parent = Environment
 	-- Must be Hidden and not ServerHidden for map to be hidden on client. I assume ServerHidden works on the server.
@@ -164,7 +227,32 @@ game_end = function(): ()
 	lobby.Parent = Environment
 	map.container:Destroy()
 
+	for _, team in map.teams do
+		team_mod.destroy(team)
+	end
+
 	delay(5, game_start)
 end
 
 game_start()
+
+local function on_player_added(player: Player): ()
+	-- ~ Todo: Replace this with an `on_entity_added` signal. This will require a Polytoria signal module.
+
+	if current_map ~= nil then
+		-- Wait a bit for the entity to be created.
+		wait(0.2)
+
+		local entity = entity_mod.find_by_player(player)
+		
+		if entity == nil then
+			print("Error: No entity was found with this player.")
+			return
+		end
+
+		setup_new_entity(current_map, entity)
+	end
+end
+
+Players.PlayerAdded:Connect(on_player_added)
+
