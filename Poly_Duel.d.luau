@@ -1,7 +1,7 @@
 declare class Poly_Duel_entity
 	id: number
 	NPC_object: NPC?
-	Player: Player?
+	player: Player?
 	team_id: number?
 end
 
