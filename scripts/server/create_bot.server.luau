@@ -1,4 +1,4 @@
-local entity = require(ScriptService:FindChild("entity") :: any)
+local entity = require(ScriptService:FindChild("entity") :: any) :: Poly_Duel_module_entity
 local event_create_bot: NetworkEvent = Hidden:FindChild("create_bot") :: any
 
 local function create_character(): Model
