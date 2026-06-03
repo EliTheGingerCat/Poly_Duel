@@ -117,6 +117,20 @@ local function pick_random_map(): map?
 	return map
 end
 
+local function reset_positions(map: map): ()
+	for _, team in map.teams do
+		local position = team.spawn_part.Position
+		local rotation = team.spawn_part.Rotation
+
+		for _, entity in team.members do
+			if entity.player ~= nil then
+				entity.player.Position = position
+				entity.player.Rotation = rotation
+			end
+		end
+	end
+end
+
 local game_end
 local function process_score(map: map, entity: entity, team: team): ()
 	team.points += 1
@@ -128,6 +142,7 @@ local function process_score(map: map, entity: entity, team: team): ()
 		game_end()
 	else
 		print(`Team with id {team.id} has {team.points} points.`)
+		reset_positions(map)
 	end
 end
 
