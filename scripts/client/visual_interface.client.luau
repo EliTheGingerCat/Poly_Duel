@@ -1,4 +1,4 @@
-local event_create_bot: NetworkEvent = Hidden:FindChild("create_bot")
+local event_create_bot: NetworkEvent = Hidden:FindChild("create_bot") :: any
 
 local interface = GUI.New()
 
