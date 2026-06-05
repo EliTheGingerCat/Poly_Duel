@@ -6,6 +6,9 @@ local function on_invoked_create_bot(_, messsage: NetMessage): ()
 	local character = PolytorianModel.New()
 	character.Position = Vector3.New(0, 9, 0)
 	character.Parent = bot
+	entity.create({
+		NPC_object = bot,
+	})
 	bot.Parent = Environment
 end
 
