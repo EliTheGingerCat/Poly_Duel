@@ -4,6 +4,6 @@
 	"luau-lsp.sourcemap.autogenerate": false,
 	"luau-lsp.types.definitionFiles": {
 		"Polytoria": "./.poly/luau/def.d.luau",
-		"Poly Duel:": "./Poly_Duel.d.luau",
+		"z Poly Duel:": "./Poly_Duel.d.luau"
 	}
 }
