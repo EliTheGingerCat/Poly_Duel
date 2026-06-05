@@ -1,2 +1,3 @@
 # Polytoria specific ignores
 .poly/
+build/
