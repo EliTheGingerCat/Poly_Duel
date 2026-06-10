@@ -6,8 +6,6 @@ Currently, the plan is for it to be a Polytoria version of [Libre Duel](<https:/
 
 To analyse the code with the Luau LS program:
 
+```bash
+luau-lsp analyze --settings ./.vscode/settings.json ./source
 ```
-luau-lsp analyze --settings ./.vscode/settings.json ./scripts
-```
-
-Though, keep in mind that there are many false positives.
