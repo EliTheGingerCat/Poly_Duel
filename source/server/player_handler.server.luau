@@ -1,6 +1,6 @@
 -- ~ Polytoria link id: f398ee4e-c717-46b4-82b8-1ec64cdb5100
 
-local entity = require(script.Parent:FindChild("entity")) :: Poly_Duel_module_entity
+local entity = require("../shared/entity")
 
 local function on_player_added(player: Player): ()
 	entity.create({

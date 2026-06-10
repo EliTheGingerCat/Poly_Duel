@@ -1,9 +1,9 @@
 -- ~ Polytoria link id: 84066fca-026b-4c4e-9173-b0f47f47d3c1
 
-local entity_mod = require(script.Parent:FindChild("entity") :: ModuleScript) :: Poly_Duel_module_entity
+local entity_mod = require("../shared/entity")
 local lobby = Environment:FindChild("lobby")
 local maps_folder = ServerHidden:FindChild("maps")
-local team_mod = require(script.Parent:FindChild("team") :: ModuleScript) :: Poly_Duel_module_team
+local team_mod = require("../shared/team")
 
 type entity = Poly_Duel_entity
 type team = Poly_Duel_team

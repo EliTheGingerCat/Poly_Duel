@@ -1,6 +1,6 @@
 -- ~ Polytoria link id: f6a3535d-6327-4c8f-89fb-318b05cca0cc
 
-local entity = require(ScriptService:FindChild("entity") :: ModuleScript) :: Poly_Duel_module_entity
+local entity = require("../shared/entity")
 local event_create_bot: NetworkEvent = Hidden:FindChild("create_bot") :: any
 
 local function on_invoked_create_bot(_, messsage: NetMessage): ()
