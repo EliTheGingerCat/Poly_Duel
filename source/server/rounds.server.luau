@@ -270,3 +270,7 @@ local function on_entity_added(entity: entity): ()
 end
 
 signal_mod.connect(entity_mod.signal_entity_added, on_entity_added)
+
+for _, entity in entity_mod.all_entities do
+	on_entity_added(entity)
+end
