@@ -1,6 +1,7 @@
 -- ~ Polytoria link id: 84066fca-026b-4c4e-9173-b0f47f47d3c1
 
 local entity_mod = require("../shared/entity")
+local event_game_state: NetworkEvent = Hidden:FindChild("game_state") :: any
 local lobby = Environment:FindChild("lobby")
 local maps_folder = ServerHidden:FindChild("maps")
 local team_mod = require("../shared/team")
@@ -231,6 +232,10 @@ local function game_start(): ()
 	map.container.Parent = Environment
 	-- Must be Hidden and not ServerHidden for map to be hidden on client. I assume ServerHidden works on the server.
 	lobby.Parent = Hidden
+
+	local message = NetMessage.New()
+	message:AddBool("did_start", true)
+	event_game_state:InvokeClients(message)
 end
 
 game_end = function(): ()
@@ -247,6 +252,10 @@ game_end = function(): ()
 	for _, team in map.teams do
 		team_mod.destroy(team)
 	end
+
+	local message = NetMessage.New()
+	message:AddBool("did_start", false)
+	event_game_state:InvokeClients(message)
 
 	delay(5, game_start)
 end
