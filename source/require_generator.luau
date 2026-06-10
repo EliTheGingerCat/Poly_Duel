@@ -10,9 +10,15 @@ local function get_module(script_caller: ModuleScript, path_require: string): Mo
 	local part_1 = parts[1]
 	local start: Instance
 	if part_1 == "." then
-		start = script_caller
-	elseif part_1 == ".." then
 		start = script_caller.Parent
+	elseif part_1 == ".." then
+		local parent = script_caller.Parent
+		local parent_2 = parent.Parent :: Instance?
+		if parent_2 == nil then
+			print(`Error: "{parent.Name}" has no parent.`)
+			return nil
+		end
+		start = parent_2
 	elseif part_1 == "" then
 		-- "/..."
 		start = world
