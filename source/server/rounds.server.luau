@@ -4,6 +4,7 @@ local entity_mod = require("../shared/entity")
 local event_game_state: NetworkEvent = Hidden:FindChild("game_state") :: any
 local lobby = Environment:FindChild("lobby")
 local maps_folder = ServerHidden:FindChild("maps")
+local signal_mod = require("../shared/signal")
 local team_mod = require("../shared/team")
 
 type entity = entity_mod.entity
@@ -262,23 +263,10 @@ end
 
 game_start()
 
-local function on_player_added(player: Player): ()
-	-- ~ Todo: Replace this with an `on_entity_added` signal. This will require a Polytoria signal module.
-
+local function on_entity_added(entity: entity): ()
 	if current_map ~= nil then
-		-- Wait a bit for the entity to be created.
-		wait(0.2)
-
-		local entity = entity_mod.find_by_player(player)
-		
-		if entity == nil then
-			print("Error: No entity was found with this player.")
-			return
-		end
-
 		setup_new_entity(current_map, entity)
 	end
 end
 
-Players.PlayerAdded:Connect(on_player_added)
-
+signal_mod.connect(entity_mod.signal_entity_added, on_entity_added)

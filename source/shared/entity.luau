@@ -1,5 +1,9 @@
 -- ~ Polytoria link id: e6976740-f26c-4ab2-850e-8c976b254bec
 
+local signal_mod = require("./signal")
+
+type signal<T...> = signal_mod.signal<T...>
+
 export type entity = {
 	id: number,
 	NPC_object: NPC?,
@@ -9,6 +13,7 @@ export type entity = {
 
 local all_entities: {entity} = {}
 local entity_id = 0
+local signal_entity_added = signal_mod.create() :: signal<entity>
 
 type entity_creation_options = {
 	NPC_object: NPC?,
@@ -31,6 +36,8 @@ local function entity_create(options: entity_creation_options): entity
 	}
 
 	table.insert(all_entities, entity)
+
+	signal_mod.fire(signal_entity_added, entity)
 	
 	return entity
 end
@@ -50,6 +57,7 @@ local entity_mod = {
 	all_entities = all_entities,
 	create = entity_create,
 	find_by_player = find_by_player,
+	signal_entity_added = signal_entity_added,
 }
 
 return entity_mod
