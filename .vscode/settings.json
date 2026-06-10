@@ -3,7 +3,6 @@
 	"luau-lsp.sourcemap.enabled": false,
 	"luau-lsp.sourcemap.autogenerate": false,
 	"luau-lsp.types.definitionFiles": {
-		"Polytoria": "./.poly/luau/def.d.luau",
-		"z Poly Duel:": "./Poly_Duel.d.luau"
+		"Polytoria": "./.poly/luau/def.d.luau"
 	}
 }

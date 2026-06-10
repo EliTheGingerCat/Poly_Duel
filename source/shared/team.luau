@@ -1,8 +1,10 @@
 -- ~ Polytoria link id: 3d9e90c6-e0a1-4c77-b69c-f34ac276478a
 
-type entity = Poly_Duel_entity
+local entity_mod = require("./entity")
 
-type team = {
+type entity = entity_mod.entity
+
+export type team = {
 	id: number,
 	goal: Part,
 	members: {entity},

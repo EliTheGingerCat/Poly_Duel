@@ -1,6 +1,6 @@
 -- ~ Polytoria link id: e6976740-f26c-4ab2-850e-8c976b254bec
 
-type entity = {
+export type entity = {
 	id: number,
 	NPC_object: NPC?,
 	player: Player?,

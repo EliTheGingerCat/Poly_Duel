@@ -5,8 +5,8 @@ local lobby = Environment:FindChild("lobby")
 local maps_folder = ServerHidden:FindChild("maps")
 local team_mod = require("../shared/team")
 
-type entity = Poly_Duel_entity
-type team = Poly_Duel_team
+type entity = entity_mod.entity
+type team = team_mod.team
 
 type map = {
 	container: Model,
