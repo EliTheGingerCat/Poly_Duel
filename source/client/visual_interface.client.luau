@@ -1,3 +1,5 @@
+-- ~ Polytoria link id: 3e2fb506-7e78-417b-b46f-db9f6bc06121
+
 local event_create_bot: NetworkEvent = Hidden:FindChild("create_bot") :: any
 
 local interface = GUI.New()

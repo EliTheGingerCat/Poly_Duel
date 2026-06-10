@@ -1,3 +1,5 @@
+-- ~ Polytoria link id: 8b60fd8e-cc35-43bd-aa23-d164af468ae6
+
 local event_attack_melee: NetworkEvent = Hidden:FindChild("attack_melee") :: any
 
 local damage = 10

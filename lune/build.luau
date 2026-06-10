@@ -1,6 +1,7 @@
 --> Process source files and prepare the final code.
 
 local fs = require("@lune/fs")
+local serde = require("@lune/serde")
 
 type MetadataKind = fs.MetadataKind
 
@@ -14,21 +15,44 @@ local require = require(ScriptService:FindChild("require_generator"))(script)
 
 ]]
 
-local function process_file_Luau(path: string): string
-	local content = fs.readFile(path)
-	local content_new = header .. content
-	return content_new
+local pattern_Polytoria_link_id = "%-%- ~ Polytoria link id: ([%l%d%-]+)"
+
+local function create_file_meta(content_Luau): string?
+	local link_id = string.match(content_Luau, pattern_Polytoria_link_id)
+	if link_id == nil then
+		print("Error: Link id was not found.")
+		return nil
+	end
+
+	local data = {
+		id = link_id,
+	}
+	local data_string = serde.encode("json", data, true)
+	local data_string_final = data_string .. "\n"
+	return data_string_final
 end
 
-local function process_file(path: string): string
-	local is_Luau = string.sub(path, -5, -1) == ".luau"
-	local is_require_generator = path == path_require_generator
-	if is_Luau == true and is_require_generator == false then
-		local content_processed = process_file_Luau(path)
-		return content_processed
+local function process_file(path_from: string, path_to: string): ()
+	local is_Luau = string.sub(path_from, -5, -1) == ".luau"
+	local is_require_generator = path_from == path_require_generator
+
+	if is_Luau == true then
+		local content_Luau_current = fs.readFile(path_from)
+		local content_Luau_new: string
+		if is_require_generator == true then
+			content_Luau_new = content_Luau_current
+		else
+			content_Luau_new = header .. content_Luau_current
+		end
+		fs.writeFile(path_to, content_Luau_new)
+
+		local path_meta_to = path_to .. ".meta"
+		local file_meta_content = create_file_meta(content_Luau_current)
+		if file_meta_content ~= nil then
+			fs.writeFile(path_meta_to, file_meta_content)
+		end
 	else
-		local content = fs.readFile(path)
-		return content
+		print(`Error: Unknown file type at path "{path_from}".`)
 	end
 end
 
@@ -48,8 +72,7 @@ while true do
 	local path_full_to = path_build .. "/" .. queue_item
 	local kind: MetadataKind? = fs.metadata(path_full_from).kind
 	if kind == "file" then
-		local content_final = process_file(path_full_from)
-		fs.writeFile(path_full_to, content_final)
+		process_file(path_full_from, path_full_to)
 	elseif kind == "dir" then
 		fs.writeDir(path_full_to)
 		for _, child in fs.readDir(path_full_from) do
