@@ -5,21 +5,34 @@ local event_game_state: NetworkEvent = Hidden:FindChild("game_state") :: any
 
 type destroy = () -> ()
 
+-- example: 01:34:67 <-- 6-7 joke
+-- However, although the format supports it, real time values can not have >= 60 seconds.
 local format_time = "%02d:%02d:%02d"
 
-local interface = GUI.New()
+local function create_create_bot(): destroy
+	local interface = GUI.New()
 
-local create_bot = UIButton.New()
-create_bot.Parent = interface
+	local create_bot = UIButton.New()
+	create_bot.PositionRelative = Vector2.New(0.1, 0.8)
+	create_bot.SizeRelative = Vector2.New(0.1, 0.01)
+	create_bot.Text = "create a bot"
+	create_bot.Parent = interface
 
-interface.Parent = PlayerGUI
+	local function on_clicked_create_bot(): ()
+		local message = NetMessage.New()
+		event_create_bot:InvokeServer(message)
+	end
 
-local function on_clicked_create_bot(): ()
-	local message = NetMessage.New()
-	event_create_bot:InvokeServer(message)
+	create_bot.Clicked:Connect(on_clicked_create_bot)
+
+	local function destroy(): ()
+		interface:Destroy()
+	end
+
+	interface.Parent = PlayerGUI
+
+	return destroy
 end
-
-create_bot.Clicked:Connect(on_clicked_create_bot)
 
 local game_state_text = {
 	[true] = "game",
@@ -83,4 +96,5 @@ local function create_game_state(): destroy
 	return destroy
 end
 
+create_create_bot()
 create_game_state()
