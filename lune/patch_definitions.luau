@@ -15,6 +15,13 @@ local replacements = {
 		to = [[]],
 	},
 	{
+		name = "global pcall",
+		from = [[declare function pcall(f: (...any) -> (boolean, any)): (boolean, ...any)
+
+]],
+		to = [[]],
+	},
+	{
 		name = "object Vector3 subtract",
 		from = [[	function __sub(self, a: Vector3, b: Vector3): Vector3
 	function __sub(self, a: Vector3, q: Quaternion): Vector3]],
