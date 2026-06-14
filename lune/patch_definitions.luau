@@ -16,7 +16,7 @@ local replacements = {
 	},
 	{
 		name = "global pcall",
-		from = [[declare function pcall(f: (...any) -> (boolean, any)): (boolean, ...any)
+		from = [[declare function pcall(f: (...any) -> (boolean, any))
 
 ]],
 		to = [[]],
