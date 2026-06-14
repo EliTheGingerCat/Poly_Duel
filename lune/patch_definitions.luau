@@ -45,26 +45,22 @@ local function sanitise_pattern(pattern: string): string
 	return pattern
 end
 
-local function goof_up_line_ending(str: string): string
-	local result = string.gsub(str, "\n", "\r\n")
+local function normalise_line_ending(str: string): string
+	local result = string.gsub(str, "\r\n", "\n")
 	return result
 end
-
 
 if fs.metadata(path_Polytoria_definitions).exists == false then
 	print("Error: Definition file was not found.")
 	return
 end
 
+local content = fs.readFile(path_Polytoria_definitions)
+
 -- Eli: This took about 30 minutes to figure out :3 .
 if process.os == "windows" then
-	for _, replacement in replacements do
-		replacement.from = goof_up_line_ending(replacement.from)
-		replacement.to = goof_up_line_ending(replacement.to)
-	end
+	content = normalise_line_ending(content)
 end
-
-local content = fs.readFile(path_Polytoria_definitions)
 
 for _, replacement in replacements do
 	local content_new, amount_substitutions = string.gsub(content, sanitise_pattern(replacement.from), replacement.to)
