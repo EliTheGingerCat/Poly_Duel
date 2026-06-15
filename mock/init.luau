@@ -2,25 +2,16 @@ local fs = require("@lune/fs")
 local luau = require("@lune/luau")
 local serde = require("@lune/serde")
 
+local datamodel = require("@self/datamodel")
+local create_environment = require("@self/create_environment")
+local file_tools = require("@self/file_tools")
+local instance_mod = require("@self/classes/instance")
+local script_mod = require("@self/classes/script")
+
+type instance = instance_mod.instance
+type script = script_mod.script
+
 type MetadataKind = fs.MetadataKind
-
-type object = {
-	Children: {object},
-	ClassName: string,
-	ID: string,
-	IsLinkedChild: boolean,
-	Name: string,
-	Properties: {
-		[string]: any,
-	}
-}
-
-type world_data = {
-	FileType: number,
-	NonInstanceObjects: {},
-	Objects: {object},
-	Version: string, -- SemVer
-}
 
 type code_file_meta_data = {
 	id: string,
@@ -66,58 +57,61 @@ local function find_code_file(link_id: string): string?
 	return nil
 end
 
-local function create_environment(): {[string]: any}
-	local environment = {}
-
-	return environment
-end
-
-local function execute_script(object: object): ()
-	local linked_script_id: string = object.Properties.LinkedScript
+local function execute_script(world: instance, script: script): any
+	local linked_script_id: string = script.LinkedScript.LinkedId
 	local path = find_code_file(linked_script_id)
 	if path == nil then
 		print(`Error: Failed to find filesystem path of code file with link id "{linked_script_id}".`)
 		return
 	end
 
-	print("path:", path)
-
-	local enviroment = create_environment()
+	local enviroment = create_environment(world, execute_script)
 
 	local content = fs.readFile(path)
 	local bytecode = luau.compile(content)
 	local chunk = luau.load(bytecode, {
-		debugName = `server script "{object.Name}"`,
+		debugName = `server script "{script.Name}"`,
 		environment = enviroment,
 	})
-	chunk()
+	local result = chunk()
+	return result
 end
 
-local function create_mock(): ()
-	local world_file_Zstandard = fs.readFile("./main.poly")
-	local world_file_JSON = serde.decompress("zstd", world_file_Zstandard)
-	local world_data: world_data = serde.decode("json", world_file_JSON)
+local function create_mock(path: string): ()
+	local file_data = file_tools.read_world_file(path)
 
-	if world_data.Version ~= "2.0.15" then
-		print(`Warning: Version {world_data.Version} is not supported. I will try anyway.`)
+	if file_data.FileType ~= 0 then
+		print("Error: This file is not a world.")
+		return
 	end
 
-	local object_queue = table.clone(world_data.Objects)
-	local object_queue_index = 0
+	local world = datamodel.from_file_data(file_data)
+	if world == nil then
+		return
+	end
+
+	local instance_queue = {world}
+	local instance_queue_index = 0
 	while true do
-		object_queue_index += 1
-		local object = object_queue[object_queue_index] :: object?
-		if object == nil then
+		instance_queue_index += 1
+		local instance = instance_queue[instance_queue_index] :: instance?
+		if instance == nil then
 			break
 		end
 
-		if object.ClassName == "ServerScript" then
-			execute_script(object)
+		if instance.ClassName == "ServerScript" then
+			local script: script = instance :: any
+			execute_script(world, script)
 		end
 
-		local children = object.Children
-		table.move(children, 1, #children, #object_queue + 1, object_queue)
+		if instance.ClassName == "ClientScript" then
+			-- ~ Todo.
+			print("Error: Todo.")
+		end
+
+		local children = instance:GetChildren()
+		table.move(children, 1, #children, #instance_queue + 1, instance_queue)
 	end
 end
 
-create_mock()
+create_mock("./main.poly")
