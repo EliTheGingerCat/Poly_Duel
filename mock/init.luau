@@ -99,12 +99,12 @@ local function create_mock(path: string): ()
 			break
 		end
 
-		if instance.ClassName == "ServerScript" then
+		if instance:IsA("ServerScript") then
 			local script: script = instance :: any
 			execute_script(world, script)
 		end
 
-		if instance.ClassName == "ClientScript" then
+		if instance:IsA("ClientScript") then
 			-- ~ Todo.
 			print("Error: Todo.")
 		end

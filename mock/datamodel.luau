@@ -29,8 +29,7 @@ local function form_object(object_data: object): instance
 
 	-- `LinkedModel` and `IsLinkedChild` remain unused.
 
-	-- ~ Todo: Add `IsA`.
-	if object_instance.ClassName == "ServerScript" or object_instance.ClassName == "ClientScript" or object_instance.ClassName == "ModuleScript" then
+	if object_instance:IsA("Script") then
 		script_mod.fix_general_instance(object_instance)
 	end
 

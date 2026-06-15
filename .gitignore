@@ -1,3 +1,4 @@
 # Polytoria specific ignores
 .poly/
 build/
+mock/classes/class_inheritance.luau

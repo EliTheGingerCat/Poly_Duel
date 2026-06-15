@@ -1,6 +1,11 @@
+local class_inheritance = require("./class_inheritance")
+
+type inheritance_chain = class_inheritance.chain
+
 export type instance = {
 	-- NetworkedObject
 	ClassName: string,
+	IsA: (self: instance, className: string) -> boolean,
 	ObjectId: string,
 	Name: string,
 
@@ -96,6 +101,28 @@ local function table_overwrite(original: {[any]: any}, replacement: {[any]: any}
 	end
 end
 
+local function is_a(self: instance, className: string): boolean
+	local self_class_name = self.ClassName
+
+	if self_class_name == className then
+		return true
+	end
+
+	local chain: inheritance_chain? = class_inheritance[self_class_name]
+	if chain == nil then
+		print(`Error: No inheritance chain was found for class "{className}".`)
+		error("Code execution must halt.")
+	end
+
+	for _, ancestor in chain do
+		if ancestor == className then
+			return true
+		end
+	end
+
+	return false
+end
+
 local function find_child(self: instance, name: string): instance?
 	local self_internal = get_internal(self)
 
@@ -127,6 +154,7 @@ local function instance_new(): instance
 	local instance_internal: instance_internal = {
 		-- NetworkedObject
 		ClassName = "Instance",
+		IsA = is_a,
 		ObjectId = "",
 		Name = "instance",
 
