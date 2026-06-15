@@ -65,7 +65,7 @@ local function execute_script(world: instance, script: script): any
 		return
 	end
 
-	local enviroment = create_environment(world, execute_script)
+	local enviroment = create_environment(world, script, execute_script)
 
 	local content = fs.readFile(path)
 	local bytecode = luau.compile(content)

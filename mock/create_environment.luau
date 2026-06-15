@@ -13,6 +13,7 @@ type require_object = {
 
 type environment = {
 	require: require_instance,
+	script: script,
 	ScriptService: instance,
 	world: instance,
 }
@@ -59,13 +60,14 @@ local function generate_require_instance(world: instance, execute_script: execut
 	return require
 end
 
-local function create_environment(world: instance, execute_script: execute_script): environment
+local function create_environment(world: instance, script: script, execute_script: execute_script): environment
 	local ScriptService = find_service(world, "ScriptService")
 
 	local require_instance = generate_require_instance(world, execute_script)
 
 	local environment = {
 		require = require_instance,
+		script = script,
 		ScriptService = ScriptService,
 		world = world,
 	}
