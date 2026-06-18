@@ -90,6 +90,8 @@ local function create_mock(path: string): ()
 		return
 	end
 
+	datamodel.reconcile_with_template(world)
+
 	local instance_queue = {world}
 	local instance_queue_index = 0
 	while true do

@@ -1,12 +1,14 @@
 local file_tools = require("./file_tools")
 local instance_mod = require("./classes/instance")
 local script_mod = require("./classes/script")
+local template_datamodel = require("./template_datamodel")
 
 type instance = instance_mod.instance
 type file_data = file_tools.file_data
-type object = file_tools.object
+type file_object = file_tools.object
+type template_object = template_datamodel.object
 
-local function form_object(object_data: object): instance
+local function form_object(object_data: file_object): instance
 	local object_instance = instance_mod.New()
 	object_instance.ClassName = object_data.ClassName
 	-- ~ Investigate: `ObjectId` is different on the client.
@@ -47,8 +49,36 @@ local function from_file_data(file_data: file_data): instance?
 	return root_instance
 end
 
+local function reconcile_with_object(instance: instance, data: template_object): ()
+	instance.ClassName = data.class_name
+	instance.Name = data.name
+
+	for _, child_data in data.children do
+		if child_data.Polytoria_Creator == true then
+			-- ~ Todo: Add an option for Polytoria Creator.
+			continue
+		end
+
+		local child_instance = instance:FindChild(child_data.name)
+		if child_instance == nil then
+			child_instance = instance_mod.New()
+			assert(child_instance, "language analysis --- If error, `child_instance` was not instantiated.")
+			child_instance.Parent = instance
+		end
+		assert(child_instance, "language analysis --- If error, `child_instance` was not instantiated.")
+
+		reconcile_with_object(child_instance, child_data)
+	end
+end
+
+local function reconcile_with_template(world: instance): ()
+	-- See in the Git repository, `polytoria-game/Polytoria/scripts/datamodel/World.cs`, `World.Setup()`.
+	reconcile_with_object(world, template_datamodel)
+end
+
 local datamodel = {
 	from_file_data = from_file_data,
+	reconcile_with_template = reconcile_with_template,
 }
 
 return datamodel
