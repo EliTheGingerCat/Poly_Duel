@@ -41,7 +41,7 @@ New: (NetworkedObject?) -> (Camera),
 		name = "object Vector3 subtract",
 		from = [[	function __sub(self, a: Vector3, b: Vector3): Vector3
 	function __sub(self, a: Vector3, q: Quaternion): Vector3]],
-		to = [[__sub: ((a: Vector3, b: Vector3) -> Vector3) & ((a: Vector3, q: Quaternion) -> Vector3)]],
+		to = [[	__sub: ((a: Vector3, b: Vector3) -> Vector3) & ((a: Vector3, q: Quaternion) -> Vector3)]],
 	},
 	{
 		name = "library `Vector3.New`",
