@@ -22,6 +22,22 @@ local replacements = {
 		to = [[]],
 	},
 	{
+		name = "global Camera object",
+		from = [[declare Camera: Camera
+
+]],
+		to = [[]],
+	},
+	{
+		name = "global Camera library",
+		from = [[declare Camera: {
+New: (NetworkedObject?) -> (Camera),
+}]],
+		to = [[declare Camera: Camera & {
+New: (NetworkedObject?) -> (Camera),
+}]]
+	},
+	{
 		name = "object Vector3 subtract",
 		from = [[	function __sub(self, a: Vector3, b: Vector3): Vector3
 	function __sub(self, a: Vector3, q: Quaternion): Vector3]],
