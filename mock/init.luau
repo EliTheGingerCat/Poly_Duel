@@ -57,6 +57,38 @@ local function find_code_file(link_id: string): string?
 	return nil
 end
 
+local function get_instance_path(world: instance, instance: instance): string
+	if instance == world then
+		return "world"
+	end
+
+	local path_pieces_backwards: {string} = {}
+	local current = instance
+	while true do
+		table.insert(path_pieces_backwards, current.Name)
+		local parent = current.Parent
+		if parent == world then
+			table.insert(path_pieces_backwards, "world")
+			break
+		elseif parent == nil then
+			print(`Error: Parent of "{tostring(current)}" is \`nil\`.`)
+			table.insert(path_pieces_backwards, "nil")
+			break
+		else
+			current = parent
+		end
+	end
+
+	local path_pieces_backwards_size = #path_pieces_backwards
+	local path_pieces_forwards: {string} = table.create(path_pieces_backwards_size)
+	for index = path_pieces_backwards_size, 1, -1 do
+		table.insert(path_pieces_forwards, path_pieces_backwards[index])
+	end
+
+	local path = table.concat(path_pieces_forwards, ".")
+	return path
+end
+
 local function execute_script(world: instance, script: script): any
 	local linked_script_id: string = script.LinkedScript.LinkedId
 	local path = find_code_file(linked_script_id)
@@ -70,7 +102,7 @@ local function execute_script(world: instance, script: script): any
 	local content = fs.readFile(path)
 	local bytecode = luau.compile(content)
 	local chunk = luau.load(bytecode, {
-		debugName = `server script "{script.Name}"`,
+		debugName = get_instance_path(world, script),
 		environment = enviroment,
 	})
 	local result = chunk()
