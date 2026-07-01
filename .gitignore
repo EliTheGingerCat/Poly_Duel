@@ -2,3 +2,7 @@
 .poly/
 build/
 mock/classes/class_inheritance.luau
+
+# pesde
+luau_packages
+lune_packages

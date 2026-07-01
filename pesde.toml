@@ -1,0 +1,15 @@
+name = "elithegingercat/poly_duel"
+version = "0.1.0"
+description = " A game with many types of duels."
+authors = ["EliTheGingerCat", "Breter98"]
+repository = "https://github.com/EliTheGingerCat/Poly_Duel"
+license = "MIT"
+
+[target]
+environment = "luau" # Polytoria
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[dev_dependencies]
+luau_lsp = { name = "pesde/luau_lsp", version = "^1.68.0", target = "lune" }
