@@ -1,5 +1,3 @@
--- ~ Polytoria link id: e6976740-f26c-4ab2-850e-8c976b254bec
-
 local signal_mod = require("./signal")
 
 type signal<T...> = signal_mod.signal<T...>

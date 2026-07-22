@@ -1,5 +1,3 @@
--- ~ Polytoria link id: 284100cd-1cb7-40f7-beb0-a67b31d651b1
-
 type callback<T...> = (T...) -> ()
 
 export type signal<T...> = {

@@ -1,5 +1,3 @@
--- ~ Polytoria link id: b4ff136a-59b9-427c-b4d6-629612219800
-
 type destroy = () -> ()
 
 local d1_length = 200

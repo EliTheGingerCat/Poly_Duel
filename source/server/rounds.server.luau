@@ -1,5 +1,3 @@
--- ~ Polytoria link id: 84066fca-026b-4c4e-9173-b0f47f47d3c1
-
 local entity_mod = require("../shared/entity")
 local event_game_state: NetworkEvent = Hidden:FindChild("game_state") :: any
 local lobby = Environment:FindChild("lobby")

@@ -1,5 +1,3 @@
--- ~ Polytoria link id: eea94b1f-00fe-45a9-96cb-8ffac97d9a3e
-
 type require = (path: string) -> any
 
 local require_native = require

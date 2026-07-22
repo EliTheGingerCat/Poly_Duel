@@ -1,5 +1,3 @@
--- ~ Polytoria link id: 22464aab-5344-4b33-9e99-99b79ba7559c
-
 local event_attack_melee: NetworkEvent = Hidden:FindChild("attack_melee") :: any
 
 local local_player = Players.LocalPlayer
