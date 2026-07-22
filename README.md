@@ -18,6 +18,16 @@ I am working on in-game development tools. For example, I have built a barebones
 
 I want to make test scripts, along with a mock of the Polytoria datamodel.
 
+### scripts
+
+#### analyse
+
+Flags:
+- `--all`: Check all code directories. This will override the positional arguments.
+- `--output`: Output the analysis to `./code_errors.txt`.
+
+Positional arguments: Code directories to check.
+
 ## Development strategies
 
 To create a new script, simply create a file in `./source`, in the desired sub-directory.
