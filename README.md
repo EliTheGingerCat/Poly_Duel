@@ -20,16 +20,6 @@ I want to make test scripts, along with a mock of the Polytoria datamodel.
 
 ## Development strategies
 
-To create a new script:
-1. In the Polytoria Creator, create a script object.
-2. Set the filesystem path to the desired place in `./build`.
-3. A code file and corresponding meta file will be created.
-4. Open the `.meta` file and copy the `id` value into the corresponding code file by using this specific format:
+To create a new script, simply create a file in `./source`, in the desired sub-directory.
 
-`-- ~ Polytoria link id: [id]`
-
-I always do this as the very first line in the script, though it is technically not necessary.
-
-5. Move the code file into the desired place in `./source`.
-
-Every time any code file is edited, one must run `lune run build`. I think it is possible to add file watching so that the script will rebuild automatically.
+If any code file gets edited, one must run `lune run build` before playtesting. I think it is possible to add file watching so that the script will rebuild automatically.
