@@ -1,4 +1,4 @@
-local file_tools = require("./file_tools")
+local file_tools = require("../miscellaneous/file_tools")
 local instance_mod = require("./classes/instance")
 local script_mod = require("./classes/script")
 local template_datamodel = require("./template_datamodel")

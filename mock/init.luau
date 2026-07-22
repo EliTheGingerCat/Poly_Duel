@@ -4,7 +4,7 @@ local serde = require("@lune/serde")
 
 local datamodel = require("@self/datamodel")
 local create_environment = require("@self/create_environment")
-local file_tools = require("@self/file_tools")
+local file_tools = require("./miscellaneous/file_tools")
 local instance_mod = require("@self/classes/instance")
 local script_mod = require("@self/classes/script")
 
