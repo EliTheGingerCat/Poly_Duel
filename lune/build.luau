@@ -305,7 +305,7 @@ local function process_file(state: build_state, path_from: string, path_to: stri
 			class_name = class_name,
 			name = script_details.name,
 			properties = {
-				IsEnabled = false,
+				IsEnabled = true,
 				LinkedScript = link_id_meta_file,
 				Compatibility = false,
 			},
