@@ -52,29 +52,44 @@ end
 type explorer_item_properties = {
 	colour: Color,
 	corresponding_instance: Instance,
+	when_mouse_down_on_enter: (() -> ())?,
 	parent: Instance,
 	position_offset: Vector2,
 }
 
-type explorer_item_result = {
-	connection: PTSignalConnection,
-	label: UILabel,
-}
-
-local function create_explorer_item(properties: explorer_item_properties): explorer_item_result
+local function create_explorer_item(properties: explorer_item_properties): PTSignalConnection
 	local instance = properties.corresponding_instance
 	local instance_name = instance.Name
+
+	local view = UIView.New()
+	view.PivotPoint = Vector2.Zero
+	view.PositionOffset = properties.position_offset
+	view.PositionRelative = Vector2.Zero
+	view.SizeOffset = Vector2.New(d1_length, row_height)
 
 	local label = UILabel.New()
 	label.BorderWidth = 1
 	label.Color = properties.colour
 	label.Name = instance_name
-	label.PivotPoint = Vector2.Zero
-	label.PositionOffset = properties.position_offset
-	label.PositionRelative = Vector2.Zero
-	label.SizeOffset = Vector2.New(d1_length, row_height)
+	label.PivotPoint = Vector2.New(0, 0.5)
+	label.PositionRelative = Vector2.New(0, 0.5)
+	label.SizeOffset = Vector2.Zero
+	label.SizeRelative = Vector2.New(0.8, 1)
 	label.Text = instance_name
-	label.Parent = properties.parent
+	label.Parent = view
+
+	if properties.when_mouse_down_on_enter ~= nil then
+		local button = UIButton.New()
+		button.PivotPoint = Vector2.New(1, 0.5)
+		button.PositionOffset = Vector2.Zero
+		button.PositionRelative = Vector2.New(1, 0.5)
+		button.SizeOffset = Vector2.Zero
+		button.SizeRelative = Vector2.New(0.2, 1)
+		button.Text = "➡️"
+		button.Parent = view
+
+		button.MouseDown:Connect(properties.when_mouse_down_on_enter)
+	end
 
 	local function when_property_changed(property_name: string): ()
 		if property_name == "Name" then
@@ -86,12 +101,9 @@ local function create_explorer_item(properties: explorer_item_properties): explo
 
 	local connection_property_changed = instance.PropertyChanged:Connect(when_property_changed)
 
-	local result = {
-		connection = connection_property_changed,
-		label = label,
-	}
+	view.Parent = properties.parent
 
-	return result
+	return connection_property_changed
 end
 
 type information_notice_properties = {
@@ -187,14 +199,14 @@ local function create_explorer(): destroy
 			child:Destroy()
 		end
 
-		local result = create_explorer_item({
+		local connection = create_explorer_item({
 			colour = colours.white,
 			corresponding_instance = root,
 			parent = scroll_view,
 			position_offset = Vector2.Zero,
 		})
 
-		table.insert(cleanup_connections, result.connection)
+		table.insert(cleanup_connections, connection)
 
 		local root_children = root:GetChildren()
 		table.sort(root_children, sort_instances_by_name)
@@ -203,22 +215,19 @@ local function create_explorer(): destroy
 			local is_even = item_order % 2 == 0
 			local colour = if is_even == true then colours.grey else colours.white
 
-			local child_result = create_explorer_item({
+			local function on_mouse_down_on_item(): ()
+				load(child)
+			end
+
+			local child_connection = create_explorer_item({
 				colour = colour,
 				corresponding_instance = child,
+				when_mouse_down_on_enter = on_mouse_down_on_item,
 				parent = scroll_view,
 				position_offset = Vector2.New(depth_indent, index * row_space),
 			})
 
-			table.insert(cleanup_connections, child_result.connection)
-
-			local item = child_result.label
-
-			local function on_mouse_down_on_item(): ()
-				load(child)
-			end
-			
-			item.MouseDown:Connect(on_mouse_down_on_item)
+			table.insert(cleanup_connections, child_connection)
 		end
 
 		local size_offset_d1 = scroll_view.SizeOffset.X
