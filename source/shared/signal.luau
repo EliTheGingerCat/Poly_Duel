@@ -4,8 +4,8 @@ export type signal<T...> = {
 	callbacks: {callback<T...>}
 }
 
-type connection = {
-	index: number,
+type connection<T...> = {
+	callback: callback<T...>,
 }
 
 local function signal_create(): signal<any>
@@ -15,16 +15,22 @@ local function signal_create(): signal<any>
 	return signal
 end
 
-local function signal_connect<T...>(signal: signal<T...>, callback: callback<T...>): connection
+local function signal_connect<T...>(signal: signal<T...>, callback: callback<T...>): connection<T...>
 	local index = #signal.callbacks + 1
 	signal.callbacks[index] = callback
-	local connection: connection = {
-		index = index,
+	local connection: connection<T...> = {
+		callback = callback
 	}
 	return connection
 end
 
-local function signal_disconnect(signal: signal<any>, index: number): ()
+local function signal_disconnect<T...>(signal: signal<T...>, connection: connection<T...>): ()
+	local index = table.find(signal.callbacks, connection.callback)
+	if index == nil then
+		print(`Error: Connection "{connection}" was not found in signal "{signal}".`)
+		return
+	end
+
 	table.remove(signal.callbacks, index)
 end
 

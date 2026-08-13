@@ -1,6 +1,19 @@
+local selection = require("../selection")
+local signal = require("../../shared/signal")
+
 type destroy = () -> ()
 
-local d1_length = 200
+type explorer_item = {
+	connection: PTSignalConnection,
+	button_select: UIButton,
+	instance: Instance,
+}
+
+type explorer_state = {
+	items: {explorer_item},
+}
+
+local d1_length = 250
 local depth_indent = 50
 local row_height = 30
 local row_padding = 10
@@ -11,6 +24,25 @@ local colours = {
 	transparent = Color.New(0, 0, 0, 0),
 	white = Color.New(1, 1, 1, 1),
 }
+
+local selection_indicator = {
+	[true] = "⬛",
+	[false] = "🔲",
+}
+
+local function find_explorer_item(explorer_state: explorer_state, instance: Instance): explorer_item?
+	for _, item in explorer_state.items do
+		if item.instance == instance then
+			return item
+		end
+	end
+
+	return nil
+end
+
+local function set_explorer_item_selection(explorer_item: explorer_item, is_selected: boolean): ()
+	explorer_item.button_select.Text = selection_indicator[is_selected]
+end
 
 type title_bar_properties = {
 	when_mouse_down_on_up: () -> (),
@@ -57,7 +89,7 @@ type explorer_item_properties = {
 	position_offset: Vector2,
 }
 
-local function create_explorer_item(properties: explorer_item_properties): PTSignalConnection
+local function create_explorer_item(properties: explorer_item_properties): explorer_item
 	local instance = properties.corresponding_instance
 	local instance_name = instance.Name
 
@@ -80,16 +112,37 @@ local function create_explorer_item(properties: explorer_item_properties): PTSig
 
 	if properties.when_mouse_down_on_enter ~= nil then
 		local button = UIButton.New()
-		button.PivotPoint = Vector2.New(1, 0.5)
-		button.PositionOffset = Vector2.Zero
-		button.PositionRelative = Vector2.New(1, 0.5)
+		button.PositionRelative = Vector2.New(0.8, 0.5)
 		button.SizeOffset = Vector2.Zero
-		button.SizeRelative = Vector2.New(0.2, 1)
+		button.SizeRelative = Vector2.New(0.1, 1)
 		button.Text = "➡️"
 		button.Parent = view
 
 		button.MouseDown:Connect(properties.when_mouse_down_on_enter)
 	end
+
+	local initial_selection_index = selection.find(instance)
+	local initially_is_selected = initial_selection_index ~= nil
+
+	local button_select = UIButton.New()
+	button_select.PositionRelative = Vector2.New(0.9, 0.5)
+	button_select.SizeOffset = Vector2.Zero
+	button_select.SizeRelative = Vector2.New(0.1, 1)
+	button_select.Text = selection_indicator[initially_is_selected]
+
+	local function when_clicked_select(): ()
+		local selection_index = selection.find(instance)
+		if selection_index ~= nil then
+			-- Is selected.
+			selection.remove(selection_index)
+		else
+			selection.add(instance)
+		end
+	end
+
+	button_select.Clicked:Connect(when_clicked_select)
+
+	button_select.Parent = view
 
 	local function when_property_changed(property_name: string): ()
 		if property_name == "Name" then
@@ -103,7 +156,13 @@ local function create_explorer_item(properties: explorer_item_properties): PTSig
 
 	view.Parent = properties.parent
 
-	return connection_property_changed
+	local explorer_item: explorer_item = {
+		connection = connection_property_changed,
+		button_select = button_select,
+		instance = instance,
+	}
+
+	return explorer_item
 end
 
 type information_notice_properties = {
@@ -124,6 +183,10 @@ local function sort_instances_by_name(a: Instance, b: Instance): boolean
 end
 
 local function create_explorer(): destroy
+	local explorer_state: explorer_state = {
+		items = {},
+	}
+
 	local interface = GUI.New()
 	interface.Name = "explorer"
 
@@ -178,6 +241,11 @@ local function create_explorer(): destroy
 			connection:Disconnect()
 		end
 		table.clear(cleanup_connections)
+
+		for _, item in explorer_state.items do
+			item.connection:Disconnect()
+		end
+		table.clear(explorer_state.items)
 	end
 
 	local function load(root: Instance): ()
@@ -199,14 +267,14 @@ local function create_explorer(): destroy
 			child:Destroy()
 		end
 
-		local connection = create_explorer_item({
+		local explorer_item = create_explorer_item({
 			colour = colours.white,
 			corresponding_instance = root,
 			parent = scroll_view,
 			position_offset = Vector2.Zero,
 		})
 
-		table.insert(cleanup_connections, connection)
+		table.insert(explorer_state.items, explorer_item)
 
 		local root_children = root:GetChildren()
 		table.sort(root_children, sort_instances_by_name)
@@ -219,7 +287,7 @@ local function create_explorer(): destroy
 				load(child)
 			end
 
-			local child_connection = create_explorer_item({
+			local child_explorer_item = create_explorer_item({
 				colour = colour,
 				corresponding_instance = child,
 				when_mouse_down_on_enter = on_mouse_down_on_item,
@@ -227,7 +295,7 @@ local function create_explorer(): destroy
 				position_offset = Vector2.New(depth_indent, index * row_space),
 			})
 
-			table.insert(cleanup_connections, child_connection)
+			table.insert(explorer_state.items, child_explorer_item)
 		end
 
 		local size_offset_d1 = scroll_view.SizeOffset.X
@@ -271,8 +339,32 @@ local function create_explorer(): destroy
 
 	load(world)
 
+	local function when_selection_added(instance: Instance): ()
+		local item = find_explorer_item(explorer_state, instance)
+		if item == nil then
+			return
+		end
+
+		set_explorer_item_selection(item, true)
+	end
+
+	local connection_selection_added = signal.connect(selection.when_added, when_selection_added)
+
+	local function when_selection_removed(instance: Instance): ()
+		local item = find_explorer_item(explorer_state, instance)
+		if item == nil then
+			return
+		end
+
+		set_explorer_item_selection(item, false)
+	end
+
+	local connection_selection_removed = signal.connect(selection.when_removed, when_selection_removed)
+
 	local function destroy(): ()
 		interface:Destroy()
+		signal.disconnect(selection.when_added, connection_selection_added)
+		signal.disconnect(selection.when_removed, connection_selection_removed)
 	end
 
 	interface.Parent = PlayerGUI
