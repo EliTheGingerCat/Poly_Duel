@@ -6,17 +6,22 @@ Currently, the plan is for it to be a Polytoria version of [Libre Duel](<https:/
 
 ## Development tools
 
-To analyse the code with the [Luau Language Server](<https://github.com/JohnnyMorganz/luau-lsp>) program:
+### in-game
 
-```bash
-luau-lsp analyze --settings ./.vscode/settings.json ./source
-```
+- datamodel explorer
+- selection outlines
 
-There are also some [Lune](<https://lune-org.github.io/docs/>) scripts.
+### mock
 
-I am working on in-game development tools. For example, I have built a barebones [explorer](./source/client/visual_interfaces/explorer.client.luau).
+There is some work done on a mock of the Polytoria datamodel.
 
-I want to make test scripts, along with a mock of the Polytoria datamodel.
+The mock is not usable yet.
+
+Location: `./mock`.
+
+### tests
+
+There are no tests yet. This is something that I want to implement using the mock.
 
 ### scripts
 
