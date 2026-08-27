@@ -38,10 +38,28 @@ New: (NetworkedObject?) -> (Camera),
 }]]
 	},
 	{
+		name = "object Vector3 add",
+		from = [[	function __add(self, a: Vector3, b: Vector3): Vector3]],
+		to = [[	__add: (a: Vector3, b: Vector3) -> Vector3]],
+	},
+	{
 		name = "object Vector3 subtract",
 		from = [[	function __sub(self, a: Vector3, b: Vector3): Vector3
 	function __sub(self, a: Vector3, q: Quaternion): Vector3]],
 		to = [[	__sub: ((a: Vector3, b: Vector3) -> Vector3) & ((a: Vector3, q: Quaternion) -> Vector3)]],
+	},
+	{
+		name = "object Vector3 multiply",
+		from = [[	function __mul(self, a: Vector3, b: Vector3): Vector3
+	function __mul(self, a: Vector3, scalar: number): Vector3
+	function __mul(self, scalar: number, b: Vector3): Vector3
+	function __mul(self, a: Vector3, q: Quaternion): Vector3]],
+		to = [[	__mul: ((a: Vector3, b: Vector3) -> Vector3) & ((a: Vector3, scalar: number) -> Vector3) & ((scalar: number, b: Vector3) -> Vector3) & ((a: Vector3, q: Quaternion) -> Vector3)]],
+	},
+	{
+		name = "object Vector3 divide",
+		from = [[	function __div(self, a: Vector3, b: number): Vector3]],
+		to = [[	__div: (a: Vector3, b: number) -> Vector3]],
 	},
 	{
 		name = "library `Vector3.New`",
