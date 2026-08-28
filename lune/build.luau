@@ -202,6 +202,9 @@ local function ensure_path_exists(start: object, path: string, end_configuration
 		assert(last_object ~= nil, "language analysis")
 		table.insert(current.Children, last_object)
 	else
+		-- Fix `nil` values.
+		last_object.LinkedModel = replace_JSON.null
+
 		link_id_found = apply_configuration(last_object, end_configuration)
 	end
 	assert(last_object ~= nil, "language analysis")
